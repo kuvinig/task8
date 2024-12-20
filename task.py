@@ -15,6 +15,9 @@ class InputData:
         size = int(input("Enter the size of the matrix (N x N): "))
         self.matrix = [[random.randint(1, 100) for _ in range(size)] for _ in range(size)]
 
+    def get_matrix(self):
+        return self.matrix
+
 
 class Algorithm:
     def __init__(self):
@@ -22,13 +25,18 @@ class Algorithm:
         self.sorted_by_columns = None
 
     def execute(self, matrix):
+        # Sort by row averages in descending order
         row_averages = [(sum(row) / len(row), row) for row in matrix]
         self.sorted_by_rows = [row for _, row in sorted(row_averages, key=lambda x: -x[0])]
 
+        # Sort columns by column averages in descending order
         col_averages = [
             sum(col) / len(col) for col in zip(*self.sorted_by_rows)
         ]
         self.sorted_by_columns = list(zip(*sorted(zip(*self.sorted_by_rows), key=lambda x: -sum(x) / len(x))))
+
+    def get_results(self):
+        return self.sorted_by_rows, self.sorted_by_columns
 
 
 class ResultOutput:
@@ -58,18 +66,21 @@ class Application:
             self.data.manual_input()
         elif choice == "r":
             self.data.random_input()
+        else:
+            print("Invalid choice. Please try again.")
         self.algorithm_executed = False
 
     def run_algorithm(self):
-        if self.data.matrix:
-            self.algorithm.execute(self.data.matrix)
+        if self.data.get_matrix():
+            self.algorithm.execute(self.data.get_matrix())
             self.algorithm_executed = True
         else:
             print("No data to process. Please input data first.")
 
     def show_results(self):
         if self.algorithm_executed:
-            self.output.display(self.algorithm.sorted_by_rows, self.algorithm.sorted_by_columns)
+            sorted_by_rows, sorted_by_columns = self.algorithm.get_results()
+            self.output.display(sorted_by_rows, sorted_by_columns)
         else:
             print("Algorithm has not been executed. Please run the algorithm first.")
 
@@ -86,9 +97,11 @@ class Application:
         }
 
         while True:
-            for k, v in menu.items():
-                print(f"{k}: {v}")
-            choice = int(input("Choose an option: "))
+            print("\nMain Menu:")
+            for key, value in menu.items():
+                print(f"{key}: {value}")
+            choice = int(input("Enter your choice: "))
+
             if choice == 1:
                 self.input_data()
             elif choice == 2:
@@ -99,3 +112,9 @@ class Application:
                 self.exit_program()
             else:
                 print("Invalid choice. Please try again.")
+
+
+# Run the application
+if __name__ == "__main__":
+    app = Application()
+    app.run()
